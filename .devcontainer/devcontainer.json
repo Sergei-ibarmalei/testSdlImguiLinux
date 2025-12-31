@@ -1,0 +1,5 @@
+{
+  "name": "testSdlImguiLinux",
+  "build": { "dockerfile": "../Dockerfile" },
+  "workspaceFolder": "/work"
+}
