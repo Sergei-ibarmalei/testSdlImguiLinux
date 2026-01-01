@@ -32,7 +32,7 @@ static float  GetDpiScale(SDL_Window* w, SDL_Renderer* r)
 
 
 
-int main(int, char**)
+int main_old(int, char**)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {

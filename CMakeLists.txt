@@ -23,7 +23,9 @@ if (ENABLE_IMGUI_DEMO)
 endif()
 
 add_executable(${APP_TARGET}
-    src/main.cpp
+    #src/main.cpp
+    src/withDocker.cpp
+    src/simpleSDL.cpp
     ${IMGUI_SOURCES}
     third_party/imgui/backends/imgui_impl_sdl2.cpp
     third_party/imgui/backends/imgui_impl_sdlrenderer2.cpp
