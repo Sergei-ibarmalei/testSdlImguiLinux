@@ -6,6 +6,20 @@
 #include "backends/imgui_impl_sdlrenderer2.h"
 
 #include <cstdio>
+#include <iostream>
+
+
+static float  GetDpiScale(SDL_Window* w, SDL_Renderer* r)
+{
+    int win_w, win_h, out_w, out_h;
+    SDL_GetWindowSize(w, &win_w, &win_h);
+    std::cout << "Window size is: [" << win_w << ", " << win_h << "]\n";
+    SDL_GetRendererOutputSize(r, &out_w, &out_h);
+    std::cout << "Render output size is: [" << out_w << ", " << out_h << "]\n";
+    return (win_w > 0) ? (float)out_w / (float)win_w : 1.0f;
+}
+
+
 
 int main(int, char**)
 {
@@ -15,7 +29,7 @@ int main(int, char**)
         return 1;
     }
 
-    const int imgFlags = IMG_INIT_PNG;
+    const int imgFlags = IMG_INIT_PNG; 
     if ((IMG_Init(imgFlags) & imgFlags) != imgFlags)
     {
         std::printf("IMG_Init failed: %s\n", IMG_GetError());
@@ -26,7 +40,7 @@ int main(int, char**)
         "testSdlImguiLinux",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         1280, 720,
-        SDL_WINDOW_SHOWN
+        SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI
     );
 
     if (!window)
@@ -49,12 +63,28 @@ int main(int, char**)
         return 1;
     }
 
+    const float scale = GetDpiScale(window, renderer);
+    const float baseFontPx = 16.0f;
+
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     ImGui::StyleColorsDark();
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ScaleAllSizes(scale);
+
+    io.Fonts->Clear();
+    // Важно: пересоздать текстуру шрифтов для SDLRenderer2 бэкенда
+    ImGui_ImplSDLRenderer2_DestroyDeviceObjects();
+    io.Fonts->AddFontFromFileTTF("assets/Roboto-Medium.ttf", baseFontPx * scale);
+    //io.FontGlobalScale = 1.0f;
+    //io.Fonts->Build();
+
+
+
 
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);

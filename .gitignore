@@ -4,6 +4,7 @@ out/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
+assets/
 *.vcxproj*
 *.sln
 *.dir/
