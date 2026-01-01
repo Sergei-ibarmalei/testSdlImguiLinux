@@ -63,6 +63,10 @@ int main(int argc, char* argv[])
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 
+		// убираем отступы
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
 		ImGuiViewport* vp = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(vp->WorkPos, ImGuiCond_Always);
 		ImGui::SetNextWindowSize(vp->WorkSize, ImGuiCond_Always);
@@ -74,13 +78,30 @@ int main(int argc, char* argv[])
 			ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoSavedSettings |
 			ImGuiWindowFlags_NoBringToFrontOnFocus |
-			ImGuiWindowFlags_NoNavFocus;
+			ImGuiWindowFlags_NoNavFocus |
+			ImGuiWindowFlags_NoDocking;
 
 		ImGui::Begin("DockHost", nullptr, host_flags);
 
 		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 		ImGui::DockSpace(dockspace_id, ImVec2(0, 0));
+
 		ImGui::End();
+
+		ImGui::PopStyleVar(2);
+
+		ImGui::Begin("Hierarchy");
+		ImGui::Text("Hello from Heirarchy");
+		ImGui::End();
+
+		ImGui::Begin("Inspector");
+		ImGui::Text("Hello from Inspector");
+		ImGui::End();
+
+		ImGui::Begin("Viewport");
+		ImGui::Text("Hello from Viewport");
+		ImGui::End();
+
 
 		// Render
 		ImGui::Render();
