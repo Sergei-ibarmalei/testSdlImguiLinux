@@ -80,7 +80,7 @@ int main(int, char**)
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = ImGui::GetIO(); //(void)io;
     ImGui::StyleColorsDark();
 
     ImGuiStyle& style = ImGui::GetStyle();
@@ -90,7 +90,7 @@ int main(int, char**)
     // Важно: пересоздать текстуру шрифтов для SDLRenderer2 бэкенда
     ImGui_ImplSDLRenderer2_DestroyDeviceObjects();
     io.Fonts->AddFontFromFileTTF("assets/Roboto-Medium.ttf", baseFontPx * scale);
-    //io.FontGlobalScale = 1.0f;
+    io.FontGlobalScale = 1.0f;
     //io.Fonts->Build();
 
 
@@ -109,6 +109,18 @@ int main(int, char**)
         SDL_Event e;
         while (SDL_PollEvent(&e))
         {
+            if (e.type == SDL_KEYDOWN)
+            {
+                switch (e.key.keysym.sym)
+                {
+                case SDLK_ESCAPE:
+                {
+                    running = false;
+                    break;
+                }
+                default: {}
+                }
+            }
             ImGui_ImplSDL2_ProcessEvent(&e);
             if (e.type == SDL_QUIT)
                 running = false;
