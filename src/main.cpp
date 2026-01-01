@@ -73,6 +73,13 @@ int main(int, char**)
         return 1;
     }
 
+    float sx, sy;
+    SDL_RenderGetScale(renderer, &sx, &sy);
+    printf("Render scale: %.2f %.2f\n", sx, sy);
+    SDL_Rect vp;
+    SDL_RenderGetViewport(renderer, &vp);
+    printf("Viewport: %d %d %d %d\n", vp.x, vp.y, vp.w, vp.h);
+
     const float scale = GetDpiScale(window, renderer);
     const float baseFontPx = 16.0f;
 
