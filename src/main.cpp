@@ -15,6 +15,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <cstring>
 
 
 static float  GetDpiScale(SDL_Window* w, SDL_Renderer* r)
