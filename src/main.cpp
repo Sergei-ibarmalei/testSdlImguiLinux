@@ -19,11 +19,13 @@
 
 static float  GetDpiScale(SDL_Window* w, SDL_Renderer* r)
 {
-    int win_w, win_h, out_w, out_h;
+    int win_w, win_h, out_w, out_h, pw, ph;
     SDL_GetWindowSize(w, &win_w, &win_h);
     std::cout << "Window size is: [" << win_w << ", " << win_h << "]\n";
     SDL_GetRendererOutputSize(r, &out_w, &out_h);
     std::cout << "Render output size is: [" << out_w << ", " << out_h << "]\n";
+    SDL_GetWindowSizeInPixels(w, &pw, &ph);
+    std::cout << "Pixels size: [" << pw << ", " << ph << "]\n";
     return (win_w > 0) ? (float)out_w / (float)win_w : 1.0f;
 }
 
