@@ -80,24 +80,36 @@ int main(int, char**)
     SDL_RenderGetViewport(renderer, &vp);
     printf("Viewport: %d %d %d %d\n", vp.x, vp.y, vp.w, vp.h);
 
-    const float scale = GetDpiScale(window, renderer);
-    const float baseFontPx = 16.0f;
+    const float dpiScale = GetDpiScale(window, renderer);
+    float uiScale = 1.0f;
+
+    // Если запущено через X11/XWayland - делаем UI больше руками
+    if (const char* vd = SDL_GetCurrentVideoDriver(); vd && std::strcmp(vd, "x11") == 0)
+    {
+        uiScale = 2.0f;
+    }
 
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); //(void)io;
+    //(void)io;
     ImGui::StyleColorsDark();
 
     ImGuiStyle& style = ImGui::GetStyle();
-    style.ScaleAllSizes(scale);
+    style = ImGuiStyle();          // чтобы не накапливать масштабы
+    style.ScaleAllSizes(uiScale);  //  ВНИМАНИЕ - только uiScale, не dpiScale
+    ImGuiIO& io = ImGui::GetIO();
 
     io.Fonts->Clear();
+    const float baseFontPx = 16.0f;
     // Важно: пересоздать текстуру шрифтов для SDLRenderer2 бэкенда
-    ImGui_ImplSDLRenderer2_DestroyDeviceObjects();
-    io.Fonts->AddFontFromFileTTF("assets/Roboto-Medium.ttf", baseFontPx * scale);
-    io.FontGlobalScale = 1.0f;
+    //ImGui_ImplSDLRenderer2_DestroyDeviceObjects();
+    io.Fonts->AddFontFromFileTTF("assets/Roboto-Medium.ttf", baseFontPx * dpiScale * uiScale);
+
+    // А чтобы “DPI” не сделал текст в 2 раза больше на Wayland — компенсируем глобальным масштабом:
+    io.FontGlobalScale = 1.0f / dpiScale;
+    //io.FontGlobalScale = 1.0f;
     //io.Fonts->Build();
 
 
