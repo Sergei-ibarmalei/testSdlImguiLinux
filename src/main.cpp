@@ -153,7 +153,7 @@ int main(int, char**)
         ImGui_ImplSDLRenderer2_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("ImGui + SDL2 smoke test");
+        ImGui::Begin("ImGui + SDL2 smoke test", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::Text("Project: %s", "testSdlImguiLinux");
 #ifdef ENABLE_IMGUI_DEMO
         ImGui::Checkbox("Show Demo Window", &showDemo);
