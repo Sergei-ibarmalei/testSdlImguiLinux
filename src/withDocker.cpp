@@ -21,11 +21,11 @@ int main(int argc, char* argv[])
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 
-	// �� ��������� ��������� ����
+	// запрещаем запись в ini file
 	ImGuiIO& io = ImGui::GetIO();
 	io.IniFilename = nullptr;
 
-	// ��������� Docker
+	// подключаем Docking
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 
@@ -44,6 +44,18 @@ int main(int argc, char* argv[])
 			if (e.type == SDL_QUIT) running = false;
 			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE)
 				running = false;
+			else if (e.type == SDL_KEYDOWN)
+			{
+				switch (e.key.keysym.sym)
+				{
+				case SDLK_ESCAPE:
+				{
+					running = false;
+					break;
+				}
+				default: {}
+				}
+			}
 		}
 
 		// New Frame
