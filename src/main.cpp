@@ -1,4 +1,4 @@
-#ifdef _WIN32
+ï»¿#ifdef _WIN32
 #include <SDL.h>
 #include <SDL_image.h>
 #else
@@ -83,7 +83,7 @@ int main(int, char**)
     const float dpiScale = GetDpiScale(window, renderer);
     float uiScale = 1.0f;
 
-    // Åñëè çàïóùåíî ÷åðåç X11/XWayland - äåëàåì UI áîëüøå ðóêàìè
+    // Ð•ÑÐ»Ð¸ Ð·Ð°Ð¿ÑƒÑ‰ÐµÐ½Ð¾ Ñ‡ÐµÑ€ÐµÐ· X11/XWayland - Ð´ÐµÐ»Ð°ÐµÐ¼ UI Ð±Ð¾Ð»ÑŒÑˆÐµ Ñ€ÑƒÐºÐ°Ð¼Ð¸
     if (const char* vd = SDL_GetCurrentVideoDriver(); vd && std::strcmp(vd, "x11") == 0)
     {
         uiScale = 2.0f;
@@ -97,17 +97,17 @@ int main(int, char**)
     ImGui::StyleColorsDark();
 
     ImGuiStyle& style = ImGui::GetStyle();
-    style = ImGuiStyle();          // ÷òîáû íå íàêàïëèâàòü ìàñøòàáû
-    style.ScaleAllSizes(uiScale);  //  ÂÍÈÌÀÍÈÅ - òîëüêî uiScale, íå dpiScale
+    style = ImGuiStyle();          // Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð½Ðµ Ð½Ð°ÐºÐ°Ð¿Ð»Ð¸Ð²Ð°Ñ‚ÑŒ Ð¼Ð°ÑÑˆÑ‚Ð°Ð±Ñ‹
+    style.ScaleAllSizes(uiScale);  //  Ð’ÐÐ˜ÐœÐÐÐ˜Ð• - Ñ‚Ð¾Ð»ÑŒÐºÐ¾ uiScale, Ð½Ðµ dpiScale
     ImGuiIO& io = ImGui::GetIO();
 
     io.Fonts->Clear();
     const float baseFontPx = 16.0f;
-    // Âàæíî: ïåðåñîçäàòü òåêñòóðó øðèôòîâ äëÿ SDLRenderer2 áýêåíäà
+    // Ð’Ð°Ð¶Ð½Ð¾: Ð¿ÐµÑ€ÐµÑÐ¾Ð·Ð´Ð°Ñ‚ÑŒ Ñ‚ÐµÐºÑÑ‚ÑƒÑ€Ñƒ ÑˆÑ€Ð¸Ñ„Ñ‚Ð¾Ð² Ð´Ð»Ñ SDLRenderer2 Ð±ÑÐºÐµÐ½Ð´Ð°
     //ImGui_ImplSDLRenderer2_DestroyDeviceObjects();
     io.Fonts->AddFontFromFileTTF("assets/Roboto-Medium.ttf", baseFontPx * dpiScale * uiScale);
 
-    // À ÷òîáû “DPI” íå ñäåëàë òåêñò â 2 ðàçà áîëüøå íà Wayland — êîìïåíñèðóåì ãëîáàëüíûì ìàñøòàáîì:
+    // Ð Ñ‡Ñ‚Ð¾Ð±Ñ‹ â€œDPIâ€ Ð½Ðµ ÑÐ´ÐµÐ»Ð°Ð» Ñ‚ÐµÐºÑÑ‚ Ð² 2 Ñ€Ð°Ð·Ð° Ð±Ð¾Ð»ÑŒÑˆÐµ Ð½Ð° Wayland â€” ÐºÐ¾Ð¼Ð¿ÐµÐ½ÑÐ¸Ñ€ÑƒÐµÐ¼ Ð³Ð»Ð¾Ð±Ð°Ð»ÑŒÐ½Ñ‹Ð¼ Ð¼Ð°ÑÑˆÑ‚Ð°Ð±Ð¾Ð¼:
     io.FontGlobalScale = 1.0f / dpiScale;
     //io.FontGlobalScale = 1.0f;
     //io.Fonts->Build();
