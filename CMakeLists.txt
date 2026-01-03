@@ -25,11 +25,11 @@ endif()
 add_executable(${APP_TARGET}
     #src/main.cpp
     src/withDocker.cpp
-    src/simpleSDL.cpp
+    #src/simpleSDL.cpp
     ${IMGUI_SOURCES}
     third_party/imgui/backends/imgui_impl_sdl2.cpp
     third_party/imgui/backends/imgui_impl_sdlrenderer2.cpp
-)
+ "include/logs.h")
 
 # If demo enabled, define macro on target (safe place, after target exists)
 if (ENABLE_IMGUI_DEMO)

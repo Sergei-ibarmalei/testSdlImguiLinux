@@ -1,21 +1,34 @@
 ﻿//#include "/Code/Classes/simpleSDL/simpleSDL.h"
-#include "simpleSDL.h"
+//#include "simpleSDL.h"
+#include <SDL.h>
+#include <SDL_image.h>
+#include <memory>
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <iostream>
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
+#include "logs.h"
+
 
 constexpr int WINDOW_W {1800};
 constexpr int WINDOW_H {1200};
 
+using WindowPtr = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
+using RenderPtr = std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)>;
+
+[[nodiscard]] static bool InitSdl(WindowPtr& window_,
+	RenderPtr& render_, int width, int height);
+
 int main(int argc, char* argv[])
 {
-	Ssdl sdl {"SDL2 + ImGuiDocker", WINDOW_W, WINDOW_H};
-	if (sdl.Status() == false) return 1;
 
-	SDL_Window* window = sdl.Window();
-	SDL_Renderer* renderer = sdl.Renderer();
+	WindowPtr window {nullptr, SDL_DestroyWindow};
+	RenderPtr render {nullptr, SDL_DestroyRenderer};
+	bool running = InitSdl(window, render, WINDOW_W, WINDOW_H);
+	if (!running) return 1;
+
+
 
 	// Init imgui
 	IMGUI_CHECKVERSION();
@@ -30,10 +43,11 @@ int main(int argc, char* argv[])
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 
-	ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
-	ImGui_ImplSDLRenderer2_Init(renderer);
 
-	bool running = true;
+	ImGui_ImplSDL2_InitForSDLRenderer(window.get(), render.get());
+	ImGui_ImplSDLRenderer2_Init(render.get());
+
+
 	SDL_Event e;
 
 	while (running)
@@ -142,11 +156,10 @@ int main(int argc, char* argv[])
 
 		// Render
 		ImGui::Render();
-		SDL_SetRenderDrawColor(renderer, 20, 20, 24, 255);
-		SDL_RenderClear(renderer);
-
-		ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
-		SDL_RenderPresent(renderer);
+		SDL_SetRenderDrawColor(render.get(), 20, 20, 24, 255);
+		SDL_RenderClear(render.get());
+		ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), render.get());
+		SDL_RenderPresent(render.get());
 
 	}
 		// Shutdown
@@ -155,7 +168,63 @@ int main(int argc, char* argv[])
 	ImGui::DestroyContext();
 
 
-
+	render.reset();
+	window.reset();
+	IMG_Quit();
+	SDL_Quit();
 
 	return 0;
+}
+
+bool InitSdl(WindowPtr& window_, RenderPtr& render_, int width, int height)
+{
+	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+	{
+#ifdef LOG
+		std::cerr << "SDL_Init Error: " << SDL_GetError() << '\n';
+#endif
+		return false;
+	}
+    int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
+    if (!(IMG_Init(imgFlags) & imgFlags))
+    {
+        std::cerr << "IMG_Init Error: " << IMG_GetError() << std::endl;
+        SDL_Quit();
+        return false;
+    }
+
+    window_.reset(SDL_CreateWindow(
+        "Table", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN));
+
+    if (!window_)
+    {
+        std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+        IMG_Quit();
+        SDL_Quit();
+        return false;
+    }
+
+    render_.reset(SDL_CreateRenderer(
+        window_.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
+    if (!render_)
+    {
+        std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+        window_.reset();
+        IMG_Quit();
+        SDL_Quit();
+        return false;
+    }
+
+    // Проверка работы Vsync
+    if (SDL_RenderSetVSync(render_.get(), 1) != 0)
+    {
+#ifdef LOG
+        std::cout << "RenderSetVSync failed " << SDL_GetError() << '\n';
+#endif
+    }
+
+    // Включаем альфа-смешивание для рендерера
+    SDL_SetRenderDrawBlendMode(render_.get(), SDL_BLENDMODE_BLEND);
+
+    return true;
 }
