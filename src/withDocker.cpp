@@ -1,6 +1,7 @@
 ﻿//#include "/Code/Classes/simpleSDL/simpleSDL.h"
 #include "simpleSDL.h"
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <iostream>
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
@@ -82,24 +83,60 @@ int main(int argc, char* argv[])
 			ImGuiWindowFlags_NoDocking;
 
 		ImGui::Begin("DockHost", nullptr, host_flags);
-
 		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-		ImGui::DockSpace(dockspace_id, ImVec2(0, 0));
 
+		// Опционально - флаг: даем центральной зоне быть "прозрачной"
+		ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+
+		// Строим раскладку только один раз
+		// Вариант без ini: можно просто сделать static bool
+		static bool built = false;
+		if (!built)
+		{
+			built = true;
+
+			ImGui::DockBuilderRemoveNode(dockspace_id); // очистить старое дерево
+			ImGui::DockBuilderAddNode(dockspace_id, dockspace_flags | ImGuiDockNodeFlags_DockSpace);
+			ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->Size);
+
+			// Разрешаем - слева колонка, справа колонка, снизу консоль, центр - viewport
+			ImGuiID dock_main_id = dockspace_id;
+
+			ImGuiID dock_left_id = ImGui::DockBuilderSplitNode(dock_main_id, 
+				ImGuiDir_Left, 0.22f, nullptr, &dock_main_id);
+			ImGuiID dock_right_id = ImGui::DockBuilderSplitNode(dock_main_id,
+				ImGuiDir_Right, 0.28f, nullptr, &dock_main_id);
+			ImGuiID dock_bottom_id = ImGui::DockBuilderSplitNode(dock_main_id,
+				ImGuiDir_Down, 0.25f, nullptr, &dock_main_id);
+
+			// Доким окна по именам (имена должны совпадать с Begin("...")
+			ImGui::DockBuilderDockWindow("Hierarchy", dock_left_id);
+			ImGui::DockBuilderDockWindow("Inspector", dock_right_id);
+			ImGui::DockBuilderDockWindow("Console", dock_bottom_id);
+			ImGui::DockBuilderDockWindow("Viewport", dock_main_id);
+
+			ImGui::DockBuilderFinish(dockspace_id);
+
+		}
+		ImGui::DockSpace(dockspace_id, ImVec2(0, 0), dockspace_flags);
 		ImGui::End();
 
 		ImGui::PopStyleVar(2);
 
 		ImGui::Begin("Hierarchy");
-		ImGui::Text("Hello from Heirarchy");
+		ImGui::Text("Heirarchy");
 		ImGui::End();
 
 		ImGui::Begin("Inspector");
-		ImGui::Text("Hello from Inspector");
+		ImGui::Text("Inspector");
+		ImGui::End();
+
+		ImGui::Begin("Console");
+		ImGui::Text("Console");
 		ImGui::End();
 
 		ImGui::Begin("Viewport");
-		ImGui::Text("Hello from Viewport");
+		ImGui::Text("Viewport");
 		ImGui::End();
 
 
@@ -118,10 +155,7 @@ int main(int argc, char* argv[])
 	ImGui::DestroyContext();
 
 
-	//SDL_DestroyRenderer(renderer);
-	//SDL_DestroyWindow(window);
-	//IMG_Quit();
-	//SDL_Quit();
+
 
 	return 0;
 }
