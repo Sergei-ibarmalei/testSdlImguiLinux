@@ -19,6 +19,7 @@ set(IMGUI_SOURCES
 
 if (ENABLE_IMGUI_DEMO)
     list(APPEND IMGUI_SOURCES third_party/imgui/imgui_demo.cpp)
+    target_compile_definitions(${APP_TARGET} PRIVATE ENABLE_IMGUI_DEMO=1) # (note: set after add_executable)
 endif()
 
 add_executable(${APP_TARGET}
@@ -28,14 +29,11 @@ add_executable(${APP_TARGET}
     ${IMGUI_SOURCES}
     third_party/imgui/backends/imgui_impl_sdl2.cpp
     third_party/imgui/backends/imgui_impl_sdlrenderer2.cpp
-    include/logs.h
-)
+ "include/logs.h")
 
-# ---- Define macro on target (SAFE: after add_executable) ----
+# If demo enabled, define macro on target (safe place, after target exists)
 if (ENABLE_IMGUI_DEMO)
     target_compile_definitions(${APP_TARGET} PRIVATE ENABLE_IMGUI_DEMO=1)
-else()
-    target_compile_definitions(${APP_TARGET} PRIVATE ENABLE_IMGUI_DEMO=0)
 endif()
 
 target_include_directories(${APP_TARGET} PRIVATE
@@ -125,27 +123,10 @@ else()
         ${SDL2_IMAGE_INCLUDE_DIRS}
     )
 
-    # Иногда pkg-config отдаёт -L отдельно — лучше явно подхватить dirs
-    target_link_directories(${APP_TARGET} PRIVATE
-        ${SDL2_LIBRARY_DIRS}
-        ${SDL2_IMAGE_LIBRARY_DIRS}
-    )
-
     target_link_libraries(${APP_TARGET} PRIVATE
         ${SDL2_LIBRARIES}
         ${SDL2_IMAGE_LIBRARIES}
     )
-
-    # ---- Slim & fast Release for GCC/Clang (Linux) ----
-    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        target_compile_options(${APP_TARGET} PRIVATE
-            $<$<CONFIG:Release>:-O2 -DNDEBUG -ffunction-sections -fdata-sections>
-        )
-        target_link_options(${APP_TARGET} PRIVATE
-            $<$<CONFIG:Release>:-Wl,--gc-sections>
-        )
-        set_property(TARGET ${APP_TARGET} PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
-    endif()
 endif()
 
 # ---- Copy assets/ next to exe ----
