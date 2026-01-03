@@ -2,6 +2,7 @@
 //#include "simpleSDL.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <cstring>
 #include <memory>
 #include <imgui.h>
 #include <imgui_internal.h>
