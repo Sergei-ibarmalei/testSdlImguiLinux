@@ -19,6 +19,8 @@ using RenderPtr = std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)>;
 
 [[nodiscard]] static bool InitSdl(WindowPtr& window_,
 	RenderPtr& render_, int width, int height);
+static float  GetDpiScale(SDL_Window* w, SDL_Renderer* r);
+
 
 int main(int argc, char* argv[])
 {
@@ -28,6 +30,13 @@ int main(int argc, char* argv[])
 	bool running = InitSdl(window, render, WINDOW_W, WINDOW_H);
 	if (!running) return 1;
 
+	const float dpiScale = GetDpiScale(window.get(), render.get());
+	float uiScale = 1.0f;
+	// Если запущено через X11/XWayland - делаем UI больше руками
+    if (const char* vd = SDL_GetCurrentVideoDriver(); vd && std::strcmp(vd, "x11") == 0)
+    {
+        uiScale = 2.0f;
+    }
 
 
 	// Init imgui
@@ -35,9 +44,24 @@ int main(int argc, char* argv[])
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 
+
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    style = ImGuiStyle();          // чтобы не накапливать масштабы
+    style.ScaleAllSizes(uiScale);  //  ВНИМАНИЕ - только uiScale, не dpiScale
+
 	// запрещаем запись в ini file
 	ImGuiIO& io = ImGui::GetIO();
 	io.IniFilename = nullptr;
+
+    io.Fonts->Clear();
+    const float baseFontPx = 16.0f;
+    // Важно: пересоздать текстуру шрифтов для SDLRenderer2 бэкенда
+    //ImGui_ImplSDLRenderer2_DestroyDeviceObjects();
+    io.Fonts->AddFontFromFileTTF("assets/Roboto-Medium.ttf", baseFontPx * dpiScale * uiScale);
+
+    // А чтобы “DPI” не сделал текст в 2 раза больше на Wayland — компенсируем глобальным масштабом:
+    io.FontGlobalScale = 1.0f / dpiScale;
 
 	// подключаем Docking
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -174,6 +198,24 @@ int main(int argc, char* argv[])
 	SDL_Quit();
 
 	return 0;
+}
+
+static float  GetDpiScale(SDL_Window* w, SDL_Renderer* r)
+{
+    int win_w, win_h, out_w, out_h, pw, ph;
+    SDL_GetWindowSize(w, &win_w, &win_h);
+#ifdef LOG
+    std::cout << "Window size is: [" << win_w << ", " << win_h << "]\n";
+#endif
+    SDL_GetRendererOutputSize(r, &out_w, &out_h);
+#ifdef LOG
+    std::cout << "Render output size is: [" << out_w << ", " << out_h << "]\n";
+#endif
+    SDL_GetWindowSizeInPixels(w, &pw, &ph);
+#ifdef LOG
+    std::cout << "Pixels size: [" << pw << ", " << ph << "]\n";
+#endif
+    return (win_w > 0) ? (float)out_w / (float)win_w : 1.0f;
 }
 
 bool InitSdl(WindowPtr& window_, RenderPtr& render_, int width, int height)
