@@ -6,8 +6,8 @@
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 
-constexpr int WINDOW_W {1280};
-constexpr int WINDOW_H {720};
+constexpr int WINDOW_W {1800};
+constexpr int WINDOW_H {1200};
 
 int main(int argc, char* argv[])
 {
