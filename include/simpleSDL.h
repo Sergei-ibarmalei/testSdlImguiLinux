@@ -1,4 +1,4 @@
-#ifdef _WIN32
+/*#ifdef _WIN32
     #include <SDL.h>
     #include <SDL_image.h>
 #elif defined(__linux__)
@@ -6,7 +6,10 @@
     #include <SDL2/SDL_image.h>
 #else
     #error "Unsupported platform"
-#endif
+#endif*/
+#include <SDL.h>
+#include <SDL_image.h>
+
 
 #define LOG
 #ifdef LOG
